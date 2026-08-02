@@ -8,6 +8,7 @@ import org.example.modulefour.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -34,12 +35,14 @@ public class UserService {
         return ResponseEntity.ok(user.toDTO());
     }
 
+    @Transactional
     public UserDTO createUser(UserCreateDTO userCreate) {
         User user = new User(userCreate);
         userRepository.save(user);
         return user.toDTO();
     }
 
+    @Transactional
     public ResponseEntity<?> deleteUser(Long id) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
@@ -49,6 +52,7 @@ public class UserService {
         return ResponseEntity.ok(user.toDTO());
     }
 
+    @Transactional
     public ResponseEntity<?> updateUser(Long id, UserCreateDTO userUpdate) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
