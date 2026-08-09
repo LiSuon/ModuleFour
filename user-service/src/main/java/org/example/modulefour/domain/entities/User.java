@@ -14,7 +14,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
+
+    @Column(unique = true, nullable = false)
     private String email;
     private Integer age;
 
@@ -69,7 +72,7 @@ public class User {
     }
 
     public UserDTO toDTO() {
-        return new UserDTO(name, email, age, createdAt);
+        return new UserDTO(id, name, email, age, createdAt);
     }
 
     @Override

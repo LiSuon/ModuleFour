@@ -1,6 +1,8 @@
 package org.example.notificationservice.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.example.notificationservice.domain.dto.UserEvent;
 import org.example.notificationservice.services.EmailService;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,7 @@ public class UserEventListener {
     @KafkaListener(topics = "user-events", groupId = "notification-group")
     public void handleUserEvent(String message) {
         try {
+//            ConsumerRecord
             ObjectMapper mapper = new ObjectMapper(); // Jackson 3
             UserEvent event = mapper.readValue(message, UserEvent.class);
             emailService.sendNotification(event.getEmail(), event.getOperation());

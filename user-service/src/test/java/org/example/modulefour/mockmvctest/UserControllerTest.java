@@ -38,7 +38,7 @@ public class UserControllerTest extends PostgresInitializers {
     private UserRepository userRepository;
 
     public UserCreateDTO initializeUserCreateDTO(Integer num) {
-        UserCreateDTO dto = new UserCreateDTO("TestName" + num, "TestEmail" + num, 10 + num);
+        UserCreateDTO dto = new UserCreateDTO("TestName" + num, "TestEmail" + num + "@email.com", 10 + num);
         return dto;
     }
 
@@ -61,18 +61,18 @@ public class UserControllerTest extends PostgresInitializers {
 
     @Test
     public void createUserTest() throws Exception {
-        UserCreateDTO dto = initializeUserCreateDTO(0);
+        UserCreateDTO dto = initializeUserCreateDTO(1);
 
         mockMvc.perform(post("/createUser")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value(dto.getName()));
     }
 
     @Test
     public void deleteUserTest() throws Exception {
-        User user = initializeUser(initializeUserCreateDTO(0));
+        User user = initializeUser(initializeUserCreateDTO(2));
         userRepository.save(user);
 
         mockMvc.perform(delete("/deleteUser/" + user.getId()))
@@ -82,8 +82,8 @@ public class UserControllerTest extends PostgresInitializers {
 
     @Test
     public void updateUserTest() throws Exception {
-        UserCreateDTO dto = initializeUserCreateDTO(1);
-        User user = initializeUser(initializeUserCreateDTO(0));
+        UserCreateDTO dto = initializeUserCreateDTO(3);
+        User user = initializeUser(initializeUserCreateDTO(4));
         userRepository.save(user);
 
         mockMvc.perform(put("/updateUser/" + user.getId())
@@ -95,14 +95,14 @@ public class UserControllerTest extends PostgresInitializers {
 
     @Test
     public void getAllUsersTest() throws Exception{
-        User user = initializeUser(initializeUserCreateDTO(0));
-        User user2 = initializeUser(initializeUserCreateDTO(1));
+        User user = initializeUser(initializeUserCreateDTO(5));
+        User user2 = initializeUser(initializeUserCreateDTO(6));
         userRepository.saveAll(List.of(user, user2));
 
         mockMvc.perform(get("/allUsers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].name").value(user.getName()))
-                .andExpect(jsonPath("$[1].name").value(user2.getName()));
+                .andExpect(jsonPath("$._embedded.customEntityModelList.length()").value(2))
+                .andExpect(jsonPath("$._embedded.customEntityModelList[0].name").value(user.getName()))
+                .andExpect(jsonPath("$._embedded.customEntityModelList[1].name").value(user2.getName()));
     }
 }

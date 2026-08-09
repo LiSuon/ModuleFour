@@ -3,8 +3,10 @@ package org.example.modulefour.junittest;
 import org.example.modulefour.domain.dto.UserCreateDTO;
 import org.example.modulefour.domain.dto.UserDTO;
 import org.example.modulefour.domain.entities.User;
+import org.example.modulefour.domain.exceptions.UserNotFoundException;
 import org.example.modulefour.domain.messages.ErrorsMessages;
 import org.example.modulefour.repositories.UserRepository;
+import org.example.modulefour.services.KafkaProducerService;
 import org.example.modulefour.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,8 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -28,6 +29,9 @@ import static org.mockito.Mockito.*;
 public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private KafkaProducerService kafkaProducerService;
 
     @InjectMocks
     private UserService userService;
@@ -49,11 +53,10 @@ public class UserServiceTest {
 
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
 
-        ResponseEntity<?> result = userService.getUser(id);
-        UserDTO resultUser = (UserDTO) result.getBody();
+        UserDTO result = userService.getUser(id);
 
-        assertNotNull(resultUser);
-        assertEquals(user.getName(), resultUser.getName());
+        assertNotNull(result);
+        assertEquals(user.getName(), result.getName());
         verify(userRepository).findById(id);
     }
 
@@ -62,12 +65,12 @@ public class UserServiceTest {
         Long id = 1L;
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
-        ResponseEntity<?> result = userService.getUser(id);
-        Map<String, String> body = (Map<String, String>) result.getBody();
+        UserNotFoundException exception = assertThrows(
+                UserNotFoundException.class,
+                () -> userService.getUser(id)
+        );
 
-        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
-        assertThat(body.get("error")).isEqualTo(ErrorsMessages.USER_NOT_FOUND.getMessage());
-        verify(userRepository).findById(id);
+        assertEquals("User with id 1 not found", exception.getMessage());
     }
 
     @Test
@@ -105,12 +108,9 @@ public class UserServiceTest {
 
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        ResponseEntity<?> response = userService.deleteUser(user.getId());
-        UserDTO resultDTO = (UserDTO) response.getBody();
+        UserDTO resultDTO = userService.deleteUser(user.getId());
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertEquals(user.getName(), resultDTO.getName());
-        assertThat(response.getBody()).isInstanceOf(UserDTO.class);
         verify(userRepository).findById(user.getId());
         verify(userRepository).deleteById(user.getId());
     }
@@ -120,14 +120,12 @@ public class UserServiceTest {
         Long id = 99L;
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
-        ResponseEntity<?> response = userService.deleteUser(id);
-        Map<String, String> body = (Map<String, String>) response.getBody();
+        UserNotFoundException exception = assertThrows(
+                UserNotFoundException.class,
+                () -> userService.getUser(id)
+        );
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody()).isInstanceOf(Map.class);
-        assertThat(body.get("error")).isEqualTo(ErrorsMessages.USER_NOT_FOUND.getMessage());
-        verify(userRepository).findById(id);
-        verify(userRepository, never()).deleteById(any());
+        assertEquals("User with id 99 not found", exception.getMessage());
     }
 
     @Test
@@ -140,10 +138,8 @@ public class UserServiceTest {
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(updatedUser);
 
-        ResponseEntity<?> response = userService.updateUser(id, userCreateDTO);
-        UserDTO body = (UserDTO) response.getBody();
+        UserDTO body = userService.updateUser(id, userCreateDTO);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertEquals(user.getName(), body.getName());
         assertEquals(user.getEmail(), body.getEmail());
         verify(userRepository).findById(id);
@@ -153,17 +149,14 @@ public class UserServiceTest {
     @Test
     void updateUserTestNotExists() {
         Long id = 99L;
-        UserCreateDTO userCreateDTO = initializeUserCreateDTO(1);
-
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
-        ResponseEntity<?> response = userService.updateUser(id, userCreateDTO);
-        Map<String, String> body = (Map<String, String>) response.getBody();
+        UserNotFoundException exception = assertThrows(
+                UserNotFoundException.class,
+                () -> userService.getUser(id)
+        );
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody()).isInstanceOf(Map.class);
-        assertThat(body.get("error")).isEqualTo(ErrorsMessages.USER_NOT_FOUND.getMessage());
-        verify(userRepository).findById(id);
-        verify(userRepository, never()).save(any());
+        assertEquals("User with id 99 not found", exception.getMessage());
+
     }
 }
