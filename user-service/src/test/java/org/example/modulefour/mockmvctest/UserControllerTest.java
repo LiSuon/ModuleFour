@@ -10,12 +10,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureWebMvc;
+//import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+//import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureWebMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
 import java.util.List;
 
@@ -53,7 +56,7 @@ public class UserControllerTest extends PostgresInitializers {
         User user = initializeUser(initializeUserCreateDTO(0));
         userRepository.save(user);
 
-        mockMvc.perform(get("/getUser/" + user.getId()))
+        mockMvc.perform(get("api/users/getUser/" + user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(user.getName()));
 
