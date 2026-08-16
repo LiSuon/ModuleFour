@@ -19,6 +19,7 @@ import java.util.List;
 
 @RestController
 @Tag(name = "User Management", description = "Endpoints for managing users")
+@RequestMapping("/api/users")
 public class UserController {
     private UserService userService;
     private UserModelAssembler assembler;
