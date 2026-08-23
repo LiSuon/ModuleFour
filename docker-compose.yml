@@ -170,9 +170,8 @@ services:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - JAVA_TOOL_OPTIONS=-Dspring.kafka.bootstrap-servers=kafka:9092 -Deureka.client.service-url.defaultZone=http://discovery-service:8761/eureka/
     extra_hosts:
-      - "config-service:host-gateway"
-      - "discovery-service:host-gateway"
-      - "kafka:host-gateway"
+      - "localhost:host-gateway"
+      - "127.0.0.1:host-gateway"
     networks:
       - microservices-network
     restart: always
@@ -196,6 +195,9 @@ services:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - SPRING_MAIL_HOST=mailhog
       - SPRING_MAIL_PORT=1025
+    extra_hosts:
+      - "localhost:host-gateway"
+      - "127.0.0.1:host-gateway"
     networks:
       - microservices-network
     restart: always
