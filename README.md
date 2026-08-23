@@ -1,10 +1,5 @@
 # Запуск приложения
 1) docker-compose up
-2) run config-service
-3) run discovery-service
-4) run user-service
-5) run notification-service
-6) run gateway-service
 
 #### Eureka
 http://localhost:8761/
