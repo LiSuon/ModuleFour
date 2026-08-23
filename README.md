@@ -8,9 +8,9 @@ http://localhost:8080
 #### Config Server
 http://localhost:8888
 #### Swagger
-http://localhost:8080/swagger-ui/index.html#/ 
+http://localhost:8081/swagger-ui/index.html#/ 
 
-http://localhost:8080/api-docs
+http://localhost:8081/api-docs
 
 #### Просмотр сообщений
 http://localhost:8025/#
